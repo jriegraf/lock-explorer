@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     nextPanelId: 4,
+    joke: "",
     panels: [
       { panelId: 0, type: "Editor", sid: "987" },
       { panelId: 1, type: "Table", table_name: "TabA" },
@@ -89,7 +90,7 @@ export default new Vuex.Store({
       },
       {
         tableName: "Angestellte",
-        data: [{ name: "Julian" }, { name: "Fabian" }, {name: "Joachim"}],
+        data: [{ name: "Julian" }, { name: "Fabian" }, { name: "Joachim" }],
         headers: [{ text: "Name", value: "name" }],
       },
     ],
@@ -103,6 +104,9 @@ export default new Vuex.Store({
     getPanels: (state) => {
       return state.panels;
     },
+    getJoke: (state) => {
+      return state.joke;
+    },
   },
   mutations: {
     addPanel(state, panel) {
@@ -115,9 +119,26 @@ export default new Vuex.Store({
       state.panels = state.panels.filter((p) => p.panelId != panelId);
       console.log("STATE CHANGED:\n" + JSON.stringify(state));
     },
+    updateJoke(state, joke) {
+      state.joke = joke;
+      console.log("Joke updated.");
+    },
   },
   actions: {
-    // fetch asynchronous data here
+    async fetchJokes({ commit }) {
+      var myHeaders = new Headers();
+      myHeaders.append("Accept", "application/json");
+      const header = { Accept: "application/json" };
+      const url = "https://icanhazdadjoke.com/";
+
+      let joke = await fetch(url, { headers: header })
+        .then((response) => response.json())
+        .then((result) => result.joke)
+        .catch((error) => console.log("error", error));
+
+      console.log("Fetched joke: " + joke);
+      commit("updateJoke", joke);
+    },
   },
   modules: {},
 });

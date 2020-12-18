@@ -21,5 +21,9 @@ export default {
   data: () => ({
     //
   }),
+
+  mounted(){
+    this.$store.dispatch("fetchJokes"); 
+  }
 };
 </script>

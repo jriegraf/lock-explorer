@@ -33,6 +33,16 @@
         ></v-progress-circular>
       </v-expand-transition>
     </v-card-actions>
+
+    <v-snackbar v-model="snackbar" :timeout="timeout">
+      {{ getJoke }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-card>
 </template>
 
@@ -54,6 +64,8 @@ export default {
 
   data: () => ({
     code: "SELECT * FROM table;\n",
+    timeout: 100000,
+    snackbar: false,
     states: {
       editing: 0,
       loading: 1,
@@ -67,16 +79,38 @@ export default {
     },
     runBtnClick: function() {
       console.log("run pressed");
+      this.$store.dispatch("fetchJokes");
       this.state = this.states.loading;
-      let loadingTime = Math.floor(Math.random() * Math.floor(5));
-      console.log("loading for " + loadingTime + "sec");
-      setTimeout(() => (this.state = this.states.editing), loadingTime * 1000);
+    },
+  },
+
+  computed: {
+    getJoke() {
+      let currentJoke = this.$store.getters.getJoke;
+      console.log("Current Joke: " + currentJoke);
+      return currentJoke;
     },
   },
 
   props: {
     title: { type: String, required: true },
     panelId: { type: Number, required: true },
+  },
+
+  created() {
+    console.log("created");
+    this.unwatch = this.$store.watch(
+      (state, getters) => getters.getJoke,
+      (newValue, oldValue) => {
+        console.log(`Updating from '${oldValue}' to '${newValue}'`);
+        this.snackbar = true;
+        this.state = this.states.editing;
+      }
+    );
+  },
+
+  beforeDestroy() {
+    this.unwatch();
   },
 };
 </script>
