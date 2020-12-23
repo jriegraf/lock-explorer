@@ -22,8 +22,8 @@ export default {
     //
   }),
 
-  mounted(){
-    this.$store.dispatch("fetchJokes"); 
-  }
+  mounted() {
+    this.$store.dispatch("fetchTables");
+  },
 };
 </script>

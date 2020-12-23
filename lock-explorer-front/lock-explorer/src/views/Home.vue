@@ -6,14 +6,14 @@
           v-if="panel.type == 'Editor'"
           :is="panel.type"
           v-bind:panelId="panel.panelId"
-          v-bind:title="panel.sid"
+          v-bind:title="panel.name"
           v-on:removePanel="removePanel"
         ></Editor>
         <Table
           v-if="panel.type == 'Table'"
           :is="panel.type"
           v-bind:panelId="panel.panelId"
-          v-bind:title="panel.table_name"
+          v-bind:title="panel.name"
           v-on:removePanel="removePanel"
         ></Table>
       </v-col>

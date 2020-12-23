@@ -22,8 +22,8 @@
 
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <scope>runtime</scope>
+            <artifactId>ojdbc10</artifactId>
+            <scope>19.8.0.0</scope>
         </dependency>
 
         <dependency>

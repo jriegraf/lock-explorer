@@ -3,142 +3,79 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
+const API_URL = "http://localhost:8080/";
+
 export default new Vuex.Store({
   state: {
     nextPanelId: 4,
-    joke: "",
-    panels: [
-      { panelId: 0, type: "Editor", sid: "987" },
-      { panelId: 1, type: "Table", table_name: "TabA" },
-      { panelId: 2, type: "Editor", sid: "1234" },
-      { panelId: 3, type: "Table", table_name: "Angestellte" },
-    ],
-    tables: [
-      {
-        tableName: "TabA",
-        data: [
-          {
-            name: "Frozen Yogurt",
-            calories: 159,
-            fat: 6.0,
-            carbs: 24,
-            protein: 4.0,
-            iron: "1%",
-          },
-          {
-            name: "Ice cream sandwich",
-            calories: 237,
-            fat: 9.0,
-            carbs: 37,
-            protein: 4.3,
-            iron: "1%",
-          },
-          {
-            name: "Eclair",
-            calories: 262,
-            fat: 16.0,
-            carbs: 23,
-            protein: 6.0,
-            iron: "7%",
-          },
-          {
-            name: "Cupcake",
-            calories: 305,
-            fat: 3.7,
-            carbs: 67,
-            protein: 4.3,
-            iron: "8%",
-          },
-          {
-            name: "Gingerbread",
-            calories: 356,
-            fat: 16.0,
-            carbs: 49,
-            protein: 3.9,
-            iron: "16%",
-          },
-          {
-            name: "Jelly bean",
-            calories: 375,
-            fat: 0.0,
-            carbs: 94,
-            protein: 0.0,
-            iron: "0%",
-          },
-          {
-            name: "Lollipop",
-            calories: 392,
-            fat: 0.2,
-            carbs: 98,
-            protein: 0,
-            iron: "2%",
-          },
-        ],
-        headers: [
-          {
-            text: "Dessert (100g serving)",
-            align: "start",
-            sortable: false,
-            value: "name",
-          },
-          { text: "Calories", value: "calories" },
-          { text: "Fat (g)", value: "fat" },
-          { text: "Carbs (g)", value: "carbs" },
-          { text: "Protein (g)", value: "protein" },
-          { text: "Iron (%)", value: "iron" },
-        ],
-      },
-      {
-        tableName: "Angestellte",
-        data: [{ name: "Julian" }, { name: "Fabian" }, { name: "Joachim" }],
-        headers: [{ text: "Name", value: "name" }],
-      },
-    ],
+    panels: [{ panelId: 0, type: "Editor", name: "987" }],
+    availableTables: []
   },
+
   getters: {
-    getTableDataA: (state) => (tabName) => {
-      let ret = state.tables.filter((table) => table.tableName == tabName);
+    getTableData: state => tabName => {
+      let ret = state.tables.filter(table => table.tableName == tabName);
       if (ret.length > 1) throw "Multiple tables with same name!";
       return ret[0];
     },
-    getPanels: (state) => {
+    getPanels: state => {
       return state.panels;
     },
-    getJoke: (state) => {
-      return state.joke;
-    },
+    getTableList: state => {
+      console.log("getTableList: " + JSON.stringify(state.availableTables));
+      return state.availableTables;
+    }
   },
+
   mutations: {
     addPanel(state, panel) {
+      let dupPanel = state.panels.find(
+        p => p.type == panel.type && p.name == panel.name
+      );
+      if (dupPanel != undefined) {
+        state.panels = state.panels.filter(p => p.panelId != dupPanel.panelId);
+      }
       panel.panelId = state.nextPanelId;
       state.nextPanelId++;
-      state.panels.push(panel);
-      console.log("STATE CHANGED:\n" + JSON.stringify(state));
+      state.panels.unshift(panel);
+      console.debug("STATE CHANGED:\n" + JSON.stringify(state));
     },
     removePanel(state, panelId) {
-      state.panels = state.panels.filter((p) => p.panelId != panelId);
-      console.log("STATE CHANGED:\n" + JSON.stringify(state));
+      state.panels = state.panels.filter(p => p.panelId != panelId);
+      console.debug("STATE CHANGED:\n" + JSON.stringify(state));
     },
-    updateJoke(state, joke) {
-      state.joke = joke;
-      console.log("Joke updated.");
+    addTable(state, table) {
+      console.debug("ADD TABLE:\n" + JSON.stringify(state));
+      state.tables.push(table);
     },
+    setAvailableTables(state, tables) {
+      if (!Array.isArray(tables)) {
+        console.err("tables is not an array.");
+      } else {
+        state.availableTables = tables;
+      }
+    }
   },
+
   actions: {
-    async fetchJokes({ commit }) {
-      var myHeaders = new Headers();
-      myHeaders.append("Accept", "application/json");
+    async fetchTables({ commit }) {
       const header = { Accept: "application/json" };
-      const url = "https://icanhazdadjoke.com/";
+      const url = API_URL + "getTables/";
 
-      let joke = await fetch(url, { headers: header })
-        .then((response) => response.json())
-        .then((result) => result.joke)
-        .catch((error) => console.log("error", error));
-
-      console.log("Fetched joke: " + joke);
-      commit("updateJoke", joke);
-    },
+      fetch(url, { headers: header })
+        .then(response => {
+          if (response.status == 200) {
+            response.json().then(tables => {
+              console.log("Fetched tables: " + JSON.stringify(tables.data.map(x => x.TABLE_NAME)));
+              commit("setAvailableTables", tables.data.map(x => x.TABLE_NAME));
+            });
+          } else {
+            console.error("Can not fetch tables");
+          }
+        })
+        .catch(error => console.error("Can not fetch tables", error));
+    }
   },
-  modules: {},
+
+  modules: {}
 });
