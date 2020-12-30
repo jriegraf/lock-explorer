@@ -71,16 +71,15 @@ jobs:
       #           docker tag $IMAGE_NAME_API $IMAGE_ID:$VERSION
       #           docker push $IMAGE_ID:$VERSION
 
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 14
-          registry-url: https://registry.npmjs.org/
-        working-directory: lock-explorer-front/lock-explorer
-        run: |
-          npm -v
-          npm install -g @vue/cli
-          vue --version
-          npm run build
+      - run: npm install -g @vue/cli && vue --version
+      - run: npm run build
 
       - name: Build image
         working-directory: lock-explorer-front/lock-explorer
