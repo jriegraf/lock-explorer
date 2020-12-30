@@ -21,9 +21,9 @@ import static java.lang.String.format;
 @Service
 public class JdbcSessionRegister {
 
-  Logger logger = LoggerFactory.getLogger(JdbcSessionRegister.class);
-
-  List<UserData> DB = new ArrayList<>();
+  private Logger logger = LoggerFactory.getLogger(JdbcSessionRegister.class);
+  private List<UserData> DB = new ArrayList<>();
+  private OracleDataSource dataSource = new OracleDataSource();
 
   @Autowired
   UserIdGenerator idGenerator;
@@ -37,6 +37,13 @@ public class JdbcSessionRegister {
   @Value("${database.container}")
   String container;
 
+  public JdbcSessionRegister() throws SQLException {
+  }
+
+  public void setDatasource(OracleDataSource ds){
+    dataSource = ds;
+  }
+
   public Optional<Integer> newSession(String userId) throws SQLException {
     Optional<UserData> userOption = DB.stream().filter(d -> d.getUserId().equals(userId)).findFirst();
     if (userOption.isEmpty()) {
@@ -44,13 +51,12 @@ public class JdbcSessionRegister {
     }
     UserData user = userOption.get();
 
-    OracleDataSource ds = new OracleDataSource();
-    ds.setURL(format("jdbc:oracle:thin:%s/%s@%s/%s", userId, user.getPassword(), host, container));
+    dataSource.setURL(format("jdbc:oracle:thin:%s/%s@%s/%s", userId, user.getPassword(), host, container));
     java.util.Properties props = new java.util.Properties();
     props.put("v$session.osuser", userId);
     props.put("v$session.program", "LockExplorer");
-    ds.setConnectionProperties(props);
-    Connection conn = ds.getConnection();
+    dataSource.setConnectionProperties(props);
+    Connection conn = dataSource.getConnection();
     conn.setAutoCommit(false);
     Optional<Integer> sessionId = Optional.empty();
     try (ResultSet resultSet = conn.createStatement().executeQuery("SELECT sys_context('USERENV','SID') FROM DUAL")) {
