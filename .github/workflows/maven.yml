@@ -80,7 +80,11 @@ jobs:
         with:
           node-version: 14
       - run: npm install -g @vue/cli && vue --version
-      - run: npm run build
+
+          
+      - name: Build dist
+        working-directory: lock-explorer-front/lock-explorer
+        run: npm run build
 
       - name: Build image
         working-directory: lock-explorer-front/lock-explorer
