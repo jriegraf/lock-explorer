@@ -18,12 +18,14 @@ public class Message {
 
   public enum MessageType {
     REGISTER,
+    GET_SESSIONS,
     OPEN_SESSION,
     CLOSE_SESSION,
     EXECUTE_SQL,
-    GET_SID,
     GET_TABLE,
+    GET_AVAILABLE_TABLES,
     GET_VIEW,
+    GET_AVAILABLE_VIEWS,
   }
 
   @NonNull

@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 class UserController {
 
   Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -34,14 +35,17 @@ class UserController {
   @Autowired
   MessageHandler messageHandler;
 
+  Random rn = new Random();
+
   @PostMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Response> receiveMessage(@RequestBody Message message) {
     try {
-      logger.debug("Got message: {}", message);
+      logger.info("Got message: {}", message);
       return Response.ok(messageHandler.handle(message));
     } catch (Exception e) {
       HttpStatus status = e instanceof NoSuchElementException || e instanceof SQLException ?
           HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR;
+      logger.info("Respond with status {}. Message was: {}", status, e.getMessage());
       return Response.createError(status, e.getMessage());
     }
   }

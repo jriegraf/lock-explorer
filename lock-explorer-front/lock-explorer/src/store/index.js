@@ -3,16 +3,20 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
-const API_URL = "http://localhost:8080/";
-
 export default new Vuex.Store({
   state: {
+    userId: "",
     nextPanelId: 4,
-    panels: [{ panelId: 0, type: "Editor", name: "987" }],
-    availableTables: []
+    panels: [],
+    availableTables: [],
+    availableViews: [],
+    sessions: []
   },
 
   getters: {
+    getUserId: state => {
+      return state.userId;
+    },
     getTableData: state => tabName => {
       let ret = state.tables.filter(table => table.tableName == tabName);
       if (ret.length > 1) throw "Multiple tables with same name!";
@@ -24,10 +28,23 @@ export default new Vuex.Store({
     getTableList: state => {
       console.log("getTableList: " + JSON.stringify(state.availableTables));
       return state.availableTables;
+    },
+    getViewList: state => {
+      console.log("getViewList: " + JSON.stringify(state.availableViews));
+      return state.availableViews;
+    },
+    getSessions: state => {
+      console.log("getSessions: " + JSON.stringify(state.sessions));
+      return state.sessions;
     }
   },
 
   mutations: {
+    setUserId(state, id) {
+      state.userId = id;
+      console.debug("STATE CHANGED:\n" + JSON.stringify(state, null, 2));
+    },
+
     addPanel(state, panel) {
       let dupPanel = state.panels.find(
         p => p.type == panel.type && p.name == panel.name
@@ -38,44 +55,47 @@ export default new Vuex.Store({
       panel.panelId = state.nextPanelId;
       state.nextPanelId++;
       state.panels.unshift(panel);
-      console.debug("STATE CHANGED:\n" + JSON.stringify(state));
+      console.debug("STATE CHANGED:\n" + JSON.stringify(state, null, 2));
     },
+
     removePanel(state, panelId) {
       state.panels = state.panels.filter(p => p.panelId != panelId);
-      console.debug("STATE CHANGED:\n" + JSON.stringify(state));
+      console.debug("STATE CHANGED:\n" + JSON.stringify(state, null, 2));
     },
+
     addTable(state, table) {
-      console.debug("ADD TABLE:\n" + JSON.stringify(state));
       state.tables.push(table);
+      console.debug("ADD TABLE:\n" + JSON.stringify(state, null, 2));
     },
     setAvailableTables(state, tables) {
       if (!Array.isArray(tables)) {
         console.err("tables is not an array.");
       } else {
         state.availableTables = tables;
+        console.debug(
+          "SET AVAILABLE TABLES:\n" + JSON.stringify(state, null, 2)
+        );
+      }
+    },
+    setAvailableViews(state, views) {
+      if (!Array.isArray(views)) {
+        console.err("views is not an array.");
+      } else {
+        state.availableViews = views;
+        console.debug(
+          "SET AVAILABLE VIEWS:\n" + JSON.stringify(state, null, 2)
+        );
+      }
+    },
+    setSessions(state, sessions) {
+      if (!Array.isArray(sessions)) {
+        console.err("sessions is not an array.");
+      } else {
+        state.sessions = sessions.sort();
+        console.debug("SET SESSIONS:\n" + JSON.stringify(state, null, 2));
       }
     }
   },
 
-  actions: {
-    async fetchTables({ commit }) {
-      const header = { Accept: "application/json" };
-      const url = API_URL + "getTables/";
-
-      fetch(url, { headers: header })
-        .then(response => {
-          if (response.status == 200) {
-            response.json().then(tables => {
-              console.log("Fetched tables: " + JSON.stringify(tables.data.map(x => x.TABLE_NAME)));
-              commit("setAvailableTables", tables.data.map(x => x.TABLE_NAME));
-            });
-          } else {
-            console.error("Can not fetch tables");
-          }
-        })
-        .catch(error => console.error("Can not fetch tables", error));
-    }
-  },
-
-  modules: {}
+  actions: {}
 });

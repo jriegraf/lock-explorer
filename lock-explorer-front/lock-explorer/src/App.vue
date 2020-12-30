@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <Navbar />
-      <v-container fluid>
+      <v-container fill-height fluid>
         <v-fade-transition mode="out-in">
           <router-view></router-view>
         </v-fade-transition>
@@ -19,11 +19,20 @@ export default {
   components: { Navbar },
 
   data: () => ({
-    //
+    registered: false
   }),
 
-  mounted() {
-    this.$store.dispatch("fetchTables");
-  },
+  mounted() {},
+
+  async beforeMount() {
+    await this.$root
+      .queryApi({ type: "REGISTER" })
+      .then(res => this.$store.commit("setUserId", res.data.payload.userId))
+      .catch(e => console.error("Error: " + JSON.stringify(e.data)));
+
+    this.$root.getAvailableTables();
+    this.$root.getAvailableViews();
+    this.$root.getSessions();
+  }
 };
 </script>

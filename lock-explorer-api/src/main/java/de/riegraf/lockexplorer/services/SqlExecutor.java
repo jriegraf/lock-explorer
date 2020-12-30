@@ -1,14 +1,12 @@
 package de.riegraf.lockexplorer.services;
 
+import de.riegraf.lockexplorer.utils.KeyValueTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SqlExecutor {
@@ -17,9 +15,16 @@ public class SqlExecutor {
 
   public Map<String, Object> executeSql(Connection connection, String sql) throws SQLException {
     logger.debug("Execute SQL: {}", sql);
-    connection.setAutoCommit(false);
-    final Statement statement = connection.createStatement();
-    return convertResultSetToMap(statement.executeQuery(sql));
+    try (Statement statement = connection.createStatement()) {
+      boolean isResultSet = statement.execute(sql);
+      if(isResultSet){
+        return convertResultSetToMap(statement.getResultSet());
+      } else{
+        Map<String, Object> resultMap = new HashMap<>(1);
+        resultMap.put("updated", statement.getUpdateCount());
+        return resultMap;
+      }
+    }
   }
 
   private Map<String, Object> convertResultSetToMap(ResultSet resultSet) throws SQLException {
