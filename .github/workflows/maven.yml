@@ -31,4 +31,5 @@ jobs:
       run: mvn test
       
     - name: Build with Maven
+      working-directory: lock-explorer-api
       run: mvn -B package --file pom.xml
