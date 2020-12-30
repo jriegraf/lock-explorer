@@ -74,13 +74,14 @@ jobs:
     - name: Set up Node
       uses: actions/setup-node@v1
       with:
-          node-version: 12
+          node-version: 14
           
     - name: Build Frontend
       working-directory: lock-explorer-front/lock-explorer
       run: |
-          npm install -g @vue/cli
-          npm run build
+        npm install -g @vue/cli
+        vue --version
+        npm run build
 
     - name: Build image
       working-directory: lock-explorer-front/lock-explorer
