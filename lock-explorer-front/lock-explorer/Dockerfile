@@ -1,9 +1,4 @@
-FROM node:latest as build-stage
+FROM nginx
 WORKDIR /app
-COPY dist/ ./dist/
-RUN ls -la
-
-FROM nginx as production-stage
-RUN mkdir /app
-COPY --from=build-stage /app/dist /app
+COPY dist/ ./
 COPY nginx.conf /etc/nginx/nginx.conf
