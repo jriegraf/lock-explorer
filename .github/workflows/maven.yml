@@ -80,6 +80,7 @@ jobs:
       - name: Build Frontend
         working-directory: lock-explorer-front/lock-explorer
         run: |
+          npm -v
           npm install -g @vue/cli
           vue --version
           npm run build
