@@ -20,7 +20,6 @@ jobs:
       - name: Build Image
         run: |
           ls -laR
-          git clone --depth 1 git@github.com:oracle/docker-images.git
           docker-images/OracleDatabase/SingleInstance/dockerfiles/buildDockerImage.sh -v 18.4.0 -x
 
   # Push image to GitHub Packages.
