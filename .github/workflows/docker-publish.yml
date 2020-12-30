@@ -1,74 +1,56 @@
-name: Build Api
+name: Build Oralce-DB Image
 
 on:
-  push:
-    # Publish `main` as Docker `latest` image.
-    branches:
-      - main
-
-    # Publish `v1.2.3` tags as releases.
-    tags:
-      - v*
-
-  # Run tests for any PRs.
-  pull_request:
+  workflow_dispatch
 
 env:
-  # TODO: Change variable to your image's name.
-  IMAGE_NAME: image
+  IMAGE_NAME: oracle/database:18.4.0-xe
 
 jobs:
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run tests
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
 
-#   # Push image to GitHub Packages.
-#   # See also https://docs.docker.com/docker-hub/builds/
-#   push:
-#     # Ensure test job passes before pushing image.
-#     needs: test
+      - name: Run script
+        run: |
+          git clone --depth 1 git@github.com:oracle/docker-images.git
+          docker-images/OracleDatabase/SingleInstance/dockerfiles/buildDockerImage.sh -v 18.4.0 -x
 
-#     runs-on: ubuntu-latest
-#     if: github.event_name == 'push'
+  # Push image to GitHub Packages.
+  push:
 
-#     steps:
-#       - uses: actions/checkout@v2
+    needs: build
 
-#       - name: Build image
-#         run: docker build . --file Dockerfile --tag $IMAGE_NAME
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
-#       - name: Log into registry
-#         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+    steps:
+      - uses: actions/checkout@v2
 
-#       - name: Push image
-#         run: |
-#           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
-#           # Change all uppercase to lowercase
-#           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+      - name: Push image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
-#           # Strip git ref prefix from version
-#           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
-#           # Strip "v" prefix from tag name
-#           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
-#           # Use Docker `latest` tag convention
-#           [ "$VERSION" == "main" ] && VERSION=latest
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-#           echo IMAGE_ID=$IMAGE_ID
-#           echo VERSION=$VERSION
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
 
-#           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-#           docker push $IMAGE_ID:$VERSION
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
