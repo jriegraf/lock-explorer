@@ -18,7 +18,9 @@ jobs:
           repository: oracle/docker-images
 
       - name: Build Image
-        run: OracleDatabase/SingleInstance/dockerfiles/buildDockerImage.sh -v 18.4.0 -x
+        run: |
+          cd OracleDatabase/SingleInstance/dockerfiles/
+          ./buildDockerImage.sh -v 18.4.0 -x
 
   # Push image to GitHub Packages.
   push:
