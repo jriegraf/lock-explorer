@@ -21,25 +21,13 @@ jobs:
         run: |
           cd OracleDatabase/SingleInstance/dockerfiles/
           ./buildDockerImage.sh -v 18.4.0 -x
-          docker image tag oracle/database:18.4.0-xe $IMAGE_NAME:latest
-
-  # Push image to GitHub Packages.
-  push:
-
-    needs: build
-
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v2
+          docker image tag oracle/database:18.4.0-xe $IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          docker image ls
-
           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
 
           # Change all uppercase to lowercase
