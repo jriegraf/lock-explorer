@@ -13,7 +13,8 @@ on:
     branches: [ main ]
 
 env:
-  IMAGE_NAME: lock-explorer-api
+  IMAGE_NAME_API: lock-explorer-api
+  IMAGE_NAME_FRONTEND: lock-explorer-frontend
 
 jobs:
   build:
@@ -42,7 +43,7 @@ jobs:
     
     - name: Build image
       working-directory: lock-explorer-api
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME_API
 
     - name: Log into registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
@@ -50,7 +51,7 @@ jobs:
     - name: Push image
       working-directory: lock-explorer-api
       run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME_API
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
@@ -67,5 +68,44 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME_API $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+          
+    - name: Set up Node
+      uses: actions/setup-node@v1
+      with:
+          node-version: 12
+          
+    - name: Build Frontend
+      working-directory: lock-explorer-front/lock-explorer
+      run: npm run build
+
+    - name: Build image
+      working-directory: lock-explorer-front/lock-explorer
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME_FRONTEND
+
+    - name: Log into registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+    - name: Push image
+      working-directory: lock-explorer-front/lock-explorer
+      run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME_FRONTEND
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag $IMAGE_NAME_FRONTEND $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
