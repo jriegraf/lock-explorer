@@ -30,7 +30,7 @@ ORACLE_PASSWORD="$(pwgen 14 1)"
 DATABASE_PASSWORD="$(pwgen 14 1)"
 
 sed -i "s/<<ORACLE_PASSWORD>>/$ORACLE_PASSWORD/g" .env
-sed -i "s/<<ORACLE_PASSWORD>>/$DATABASE_PASSWORD/g" .env
+sed -i "s/<<DATABASE_PASSWORD>>/$DATABASE_PASSWORD/g" .env
 
 echo "--- .env file ---"
 cat .env
