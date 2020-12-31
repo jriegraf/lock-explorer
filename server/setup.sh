@@ -17,6 +17,7 @@ then
     chmod +x /usr/local/bin/docker-compose
 fi
 
-
+curl -L -o docker-compose.yml https://raw.githubusercontent.com/jriegraf/lock-explorer/main/server/docker-compose.yml
+curl -L -o create_user.sql https://raw.githubusercontent.com/jriegraf/lock-explorer/main/server/create_user.sql
 
 # docker-compose up --no-recreate

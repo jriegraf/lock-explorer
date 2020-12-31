@@ -4,6 +4,9 @@ services:
   database:
     image: "docker.pkg.github.com/jriegraf/lock-explorer/lock-explorer-database:latest"
     restart: always
+    environment:
+      - ORACLE_PWD=mysecurepassword
+      - ORACLE_CHARACTERSET=AL32UTF8
     ports:
       - "55500:5500"
       - "51521:1521"
