@@ -13,6 +13,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_PASSWORD: pw
+      DATABASE_USERNAME: user
+
     steps:
       - uses: actions/checkout@v2
 
