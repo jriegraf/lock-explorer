@@ -16,6 +16,7 @@ jobs:
     env:
       DATABASE_PASSWORD: pw
       DATABASE_USERNAME: user
+      DATABASE_URL: "localhost:8080"
 
     steps:
       - uses: actions/checkout@v2
