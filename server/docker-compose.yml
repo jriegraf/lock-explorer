@@ -1,6 +1,5 @@
 version: "3.9"
 services:
-
   database:
     image: "docker.pkg.github.com/jriegraf/lock-explorer/lock-explorer-database:latest"
     restart: always
@@ -10,6 +9,8 @@ services:
     ports:
       - "55500:5500"
       - "51521:1521"
+    volumes:
+      - ./database-scripts/:/opt/oracle/scripts/setup
 
   api:
     image: "docker.pkg.github.com/jriegraf/lock-explorer/lock-explorer-api:latest"
@@ -26,7 +27,6 @@ services:
     image: "docker.pkg.github.com/jriegraf/lock-explorer/lock-explorer-frontend:latest"
     restart: always
     ports:
-      - "8081:80"
+      - "80:80"
     depends_on:
       - "api"
-

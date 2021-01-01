@@ -20,6 +20,10 @@ public class DataSourceBean {
   @Value("${DATABASE_USERNAME}")
   private String username;
 
+  @Value("${DATABASE_URL}")
+  private String url;
+
+
   @Bean
   @Primary
   public DataSource dataSource() {
@@ -27,7 +31,7 @@ public class DataSourceBean {
         .create()
         .username(username)
         .password(password)
-        .url("jdbc:oracle:thin:@localhost:51521/XEPDB1")
+        .url("jdbc:oracle:thin:@" + url)
         .build();
   }
 }

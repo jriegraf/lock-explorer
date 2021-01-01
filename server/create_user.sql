@@ -1,10 +1,17 @@
-CREATE USER lock_explorer IDENTIFIED BY "";
+ALTER SESSION SET container = xepdb1;
+
+CREATE USER lock_explorer IDENTIFIED BY "<<DATABASE_PASSWORD>>";
 
 GRANT
-    CREATE SESSION
+    CREATE USER,
+    ALTER USER
 TO lock_explorer;
+
+GRANT connect,
+    CREATE TABLE,
+    CREATE SESSION,
+    CREATE SEQUENCE
+TO lock_explorer WITH ADMIN OPTION;
 
 ALTER USER lock_explorer
     QUOTA UNLIMITED ON users;
-
-GRANT sysdba TO lock_explorer;

@@ -31,11 +31,8 @@ public class JdbcSessionRegister {
   @Autowired
   JdbcTemplate jdbcTemplate;
 
-  @Value("${database.host}")
-  String host;
-
-  @Value("${database.container}")
-  String container;
+  @Value("${DATABASE_URL}")
+  private String url;
 
   public JdbcSessionRegister() throws SQLException {
   }
@@ -51,7 +48,7 @@ public class JdbcSessionRegister {
     }
     UserData user = userOption.get();
 
-    dataSource.setURL(format("jdbc:oracle:thin:%s/%s@%s/%s", userId, user.getPassword(), host, container));
+    dataSource.setURL(format("jdbc:oracle:thin:%s/%s@%s", userId, user.getPassword(), url));
     java.util.Properties props = new java.util.Properties();
     props.put("v$session.osuser", userId);
     props.put("v$session.program", "LockExplorer");

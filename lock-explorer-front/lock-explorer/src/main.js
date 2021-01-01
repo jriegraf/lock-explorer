@@ -8,7 +8,7 @@ import axios from "axios";
 Vue.config.productionTip = false;
 
 document.title = "LockExplorer";
-const API_URL = "http://localhost:8080/";
+const API_URL = "http://julian.riegraf.xyz:8080/";
 
 const mixin = {
   methods: {

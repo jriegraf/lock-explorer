@@ -3,6 +3,9 @@
 apt update
 apt install -y nginx pwgen
 
+# Login to Github Container Registry
+# echo $TOKEN | docker login https://docker.pkg.github.com -u jriegraf --password-stdin
+
 # check if docker is available
 if ! command -v docker &> /dev/null
 then
@@ -31,8 +34,11 @@ DATABASE_PASSWORD="$(pwgen 14 1)"
 
 sed -i "s/<<ORACLE_PASSWORD>>/$ORACLE_PASSWORD/g" .env
 sed -i "s/<<DATABASE_PASSWORD>>/$DATABASE_PASSWORD/g" .env
+sed -i "s/<<DATABASE_PASSWORD>>/$DATABASE_PASSWORD/g" create_user.sql
 
-echo "--- .env file ---"
-cat .env
+mkdir -p database-scripts
+mv create_user.sql database-scripts/
+
+
 
 docker-compose up
