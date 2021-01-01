@@ -6,9 +6,9 @@ services:
     environment:
       ORACLE_PWD: "${ORACLE_PASSWORD}"
       ORACLE_CHARACTERSET: "AL32UTF8"
-    ports:
-      - "55500:5500"
-      - "51521:1521"
+    expose:
+      - "5500"
+      - "1521"
     volumes:
       - ./database-scripts/:/opt/oracle/scripts/setup
 
