@@ -16,28 +16,15 @@ import static java.lang.String.format;
 @Setter
 public class Message {
 
-  public enum MessageType {
-    REGISTER,
-    GET_SESSIONS,
-    OPEN_SESSION,
-    CLOSE_SESSION,
-    EXECUTE_SQL,
-    GET_TABLE,
-    GET_AVAILABLE_TABLES,
-    GET_VIEW,
-    GET_AVAILABLE_VIEWS,
-  }
-
   @NonNull
   final MessageType type;
-
   final Optional<String> user;
   final Optional<Map<String, Object>> payload;
 
-  public Object getPayloadValue(String key){
-    if(payload.isEmpty()) throw new NoSuchElementException("Message has no payload.");
+  public Object getPayloadValue(String key) {
+    if (payload.isEmpty()) throw new NoSuchElementException("Message has no payload.");
     Object o = payload.get().get(key);
-    if(o == null) throw new NoSuchElementException(format("No '%s' in payload.", key));
+    if (o == null) throw new NoSuchElementException(format("No '%s' in payload.", key));
     return o;
   }
 
@@ -48,5 +35,17 @@ public class Message {
         ", user=" + user +
         ", payload='" + payload + '\'' +
         '}';
+  }
+
+  public enum MessageType {
+    REGISTER,
+    GET_SESSIONS,
+    OPEN_SESSION,
+    CLOSE_SESSION,
+    EXECUTE_SQL,
+    GET_TABLE,
+    GET_AVAILABLE_TABLES,
+    GET_VIEW,
+    GET_AVAILABLE_VIEWS,
   }
 }
