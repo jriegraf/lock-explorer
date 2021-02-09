@@ -1,12 +1,14 @@
 package de.riegraf.lockexplorer.services;
 
-import de.riegraf.lockexplorer.utils.KeyValueTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 @Service
 public class SqlExecutor {
@@ -17,9 +19,9 @@ public class SqlExecutor {
     logger.debug("Execute SQL: {}", sql);
     try (Statement statement = connection.createStatement()) {
       boolean isResultSet = statement.execute(sql);
-      if(isResultSet){
+      if (isResultSet) {
         return convertResultSetToMap(statement.getResultSet());
-      } else{
+      } else {
         Map<String, Object> resultMap = new HashMap<>(1);
         resultMap.put("updated", statement.getUpdateCount());
         return resultMap;
@@ -62,5 +64,39 @@ public class SqlExecutor {
       columnInfo.add(map);
     }
     return columnInfo;
+  }
+
+  public List<String> getLockedRows(String fullTableName, Connection connection) {
+
+    final List<Map<String, String>> columnInfo = new ArrayList<>(1);
+    columnInfo.add(new HashMap<>());
+    columnInfo.get(0).put("columnName", "ROWID");
+    columnInfo.get(0).put("columnType", "ROWID");
+
+    final List<String> freeRows;
+    final List<String> allRows;
+    try {
+      try (Statement stmt = connection.createStatement()) {
+        allRows = getDataFromResultSet(stmt.executeQuery(format("SELECT ROWID FROM %s", fullTableName)), columnInfo)
+            .stream()
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+
+      try (Statement stmt = connection.createStatement()) {
+        freeRows = getDataFromResultSet(stmt.executeQuery(format("SELECT ROWID FROM %s FOR UPDATE SKIP LOCKED", fullTableName)), columnInfo)
+            .stream()
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+      }
+      final List<String> lockedRows = allRows.stream().filter(o -> !freeRows.contains(o)).collect(Collectors.toList());
+      logger.debug("Found those locked rows in {}: {}", fullTableName, lockedRows.stream().collect(Collectors.joining(", ", "{", "}")));
+      return lockedRows;
+    } catch (Exception e) {
+      logger.debug("Exception while fetching locked rows: ", e);
+      return new ArrayList<>(0);
+    }
   }
 }

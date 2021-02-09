@@ -21,23 +21,20 @@ import static java.lang.String.format;
 @Service
 public class JdbcSessionRegister {
 
+  @Autowired
+  UserIdGenerator idGenerator;
+  @Autowired
+  JdbcTemplate jdbcTemplate;
   private Logger logger = LoggerFactory.getLogger(JdbcSessionRegister.class);
   private List<UserData> DB = new ArrayList<>();
   private OracleDataSource dataSource = new OracleDataSource();
-
-  @Autowired
-  UserIdGenerator idGenerator;
-
-  @Autowired
-  JdbcTemplate jdbcTemplate;
-
   @Value("${DATABASE_URL}")
   private String url;
 
   public JdbcSessionRegister() throws SQLException {
   }
 
-  public void setDatasource(OracleDataSource ds){
+  public void setDatasource(OracleDataSource ds) {
     dataSource = ds;
   }
 
@@ -171,17 +168,17 @@ public class JdbcSessionRegister {
             .keySet());
   }
 
+  public Optional<Connection> getJdbcConnection(String userId, int sessionNr) {
+    return DB.stream().filter(d -> d.getUserId().equals(userId))
+        .map(d -> d.getConnections().get(sessionNr))
+        .findFirst();
+  }
+
   @RequiredArgsConstructor
   @Getter
   static class UserData {
     final String userId;
     final String password;
     final Map<Integer, Connection> connections = new HashMap<>(2);
-  }
-
-  public Optional<Connection> getJdbcConnection(String userId, int sessionNr) {
-    return DB.stream().filter(d -> d.getUserId().equals(userId))
-        .map(d -> d.getConnections().get(sessionNr))
-        .findFirst();
   }
 }

@@ -45,6 +45,7 @@ class UserController {
     } catch (Exception e) {
       HttpStatus status = e instanceof NoSuchElementException || e instanceof SQLException ?
           HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR;
+      logger.debug("{}", e);
       logger.info("Respond with status {}. Message was: {}", status, e.getMessage());
       return Response.createError(status, e.getMessage());
     }

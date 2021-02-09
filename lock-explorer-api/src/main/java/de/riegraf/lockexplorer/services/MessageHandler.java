@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -97,7 +96,7 @@ public class MessageHandler {
       sql = format("SELECT * FROM V$LOCKED_OBJECT WHERE oracle_username = '%S'", message.getUser().orElseThrow());
 
     } else if (viewName.equalsIgnoreCase("V$LOCKED_TABLES")) {
-      sql = String.format("SELECT c.object_name, c.object_type, b.sid, b.serial#, b.status " +
+      sql = format("SELECT c.object_name, c.object_type, b.sid, b.serial#, b.status " +
           "FROM v$locked_object a, v$session b, all_objects c " +
           "WHERE b.sid = a.session_id " +
           "AND b.sid IN (%s) " +
@@ -115,12 +114,13 @@ public class MessageHandler {
 
   private KeyValueTuple getTable(Message message) throws SQLException {
     final String tableName = (String) message.getPayloadValue("tableName");
-    final Connection connection = sessionRegister.getConnection(
-        message.getUser().orElseThrow(() -> new NoSuchElementException("No such user")),
-        (int) message.getPayloadValue("sessionNr"));
-    final Map<String, Object> map = sqlExecutor.executeSql(connection, "SELECT * FROM " + tableName);
+    final String user = message.getUser().orElseThrow(() -> new NoSuchElementException("No such user"));
+    final Connection connection = sessionRegister.getConnection(user, (int) message.getPayloadValue("sessionNr"));
+    final Map<String, Object> map = sqlExecutor.executeSql(connection, format("SELECT ROWID, A.* FROM %s A", tableName));
+    map.put("lockedRows", sqlExecutor.getLockedRows(format("%s.%s", user, tableName), systemConnection.getDataSource().getConnection()));
     return new KeyValueTuple("tableData", map);
   }
+
 
   private KeyValueTuple executeSql(Message message) throws Exception {
     try {

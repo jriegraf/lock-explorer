@@ -132,6 +132,9 @@ export default {
         code:
           "INSERT INTO persons (first_name, last_name) VALUES ('John', 'Doe');"
       },
+      {
+        code: "UPDATE persons SET first_name = 'Johnny' WHERE person_id = 1;"
+      },
       { code: "COMMIT;" }
     ],
     timeout: 100000,
