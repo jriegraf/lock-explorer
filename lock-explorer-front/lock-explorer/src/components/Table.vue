@@ -28,6 +28,7 @@
       must-sort
       :headers="headers"
       :items="data"
+      :item-class="tableRowClass"
       item-key="name"
       class="elevation-1"
     />
@@ -51,20 +52,15 @@ export default {
     loading: true,
     headers: [],
     data: [],
+    lockedRows: [],
     session: 0
   }),
-  computed: {
-    getTableData() {
-      try {
-        return this.$store.getters.getTableData(this.title);
-      } catch (err) {
-        console.err(err);
-        return [];
-      }
-    }
-  },
+  computed: {},
 
   methods: {
+    tableRowClass: function(item) {
+      return this.lockedRows.includes(item.ROWID) ? "lockedRow" : "";
+    },
     fetchData: function() {
       this.loading = true;
 
@@ -97,18 +93,31 @@ export default {
           console.info(
             "SUC: " + JSON.stringify(json.data.payload[selector], null, 2)
           );
-          this.headers = json.data.payload[selector].columnInfo.map(v => ({
-            text: v.columnName,
-            value: v.columnName
-          }));
-          this.data = json.data.payload[selector].data;
+          const payload = json.data.payload[selector];
+          this.headers = payload.columnInfo
+            .filter(col => col.columnName !== "ROWID")
+            .map(v => ({
+              text: v.columnName,
+              value: v.columnName
+            }));
+          this.data = payload.data;
+          if ("lockedRows" in payload) {
+            this.lockedRows = payload.lockedRows;
+          }
         })
         .catch(e => console.error("Error: " + JSON.stringify(e.response.data)))
         .finally(() => (this.loading = false));
     }
   },
   async mounted() {
+    this.session = this.$root.$store.getters.getSessions[0];
     this.fetchData();
   }
 };
 </script>
+
+<style>
+.lockedRow {
+  background-color: rgb(244, 67, 55);
+}
+</style>
