@@ -3,28 +3,24 @@
     <v-row v-if="userIdPresent">
       <v-col v-for="panel in panels" v-bind:key="panel.panelId">
         <Editor
-          v-if="panel.type == 'Editor'"
-          :is="panel.type"
+          v-if="panel.type === 'Editor'"
           v-bind:panelId="panel.panelId"
           v-bind:title="panel.name"
           v-on:removePanel="removePanel"
         ></Editor>
-        <Table
-          v-if="panel.type == 'Table'"
-          :is="panel.type"
+        <DbTable
+          v-if="panel.type === 'Table'"
           type="Table"
           v-bind:panelId="panel.panelId"
-          v-bind:title="panel.name"
+          v-bind:tableObj="panel.table"
           v-on:removePanel="removePanel"
-        ></Table>
-        <Table
-          v-if="panel.type == 'View'"
-          is="Table"
-          type="View"
+        ></DbTable>
+        <DbView
+          v-if="panel.type === 'View'"
           v-bind:panelId="panel.panelId"
           v-bind:title="panel.name"
           v-on:removePanel="removePanel"
-        ></Table>
+        ></DbView>
       </v-col>
     </v-row>
     <v-row v-else align="center" justify="center">
@@ -42,10 +38,11 @@
 
 <script>
 import Editor from "@/components/Editor";
-import Table from "@/components/Table";
+import DbTable from "@/components/DbTable";
+import DbView from "@/components/DbView";
 
 export default {
-  components: { Table, Editor },
+  components: { DbTable, Editor, DbView },
 
   data: () => ({
     name: "home"

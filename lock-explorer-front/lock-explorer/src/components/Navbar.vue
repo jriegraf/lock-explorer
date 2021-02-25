@@ -36,12 +36,12 @@
                 </v-btn>
               </v-card-actions>
               <v-divider></v-divider>
-              <v-list-item>
+              <v-list-item @click="openSession">
                 <v-list-item-icon>
                   <v-icon>mdi-plus</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                  <span @click="openSession">Add Session</span>
+                  <span>Add Session</span>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -80,12 +80,15 @@
         </template>
 
         <v-list-item
-          v-for="title in tables"
-          :key="title"
-          @click="openTable(title)"
+          v-for="table in tables"
+          :key="table.name"
+          @click="openTable(table)"
         >
           <v-icon>mdi-menu-right</v-icon>
-          <span class="text-lowercase" v-text="title"></span>
+          <v-icon class="mr-2" color="red" v-if="table.locked === 'yes'">
+            mdi-lock
+          </v-icon>
+          <span class="text-lowercase" v-text="table.name"></span>
         </v-list-item>
       </v-list-group>
 
@@ -141,14 +144,14 @@ export default {
       this.$store.commit("addPanel", editor);
       this.session = "";
     },
-    openTable: function(tableName) {
-      let table = { type: "Table", name: tableName };
-      console.log("openTable " + JSON.stringify(table));
-      this.$store.commit("addPanel", table);
+    openTable: function(table) {
+      let tableObj = { type: "Table", table: table };
+      console.log("openTable: " + JSON.stringify(tableObj));
+      this.$store.commit("addPanel", tableObj);
     },
     openView: function(viewName) {
       let view = { type: "View", name: viewName };
-      console.log("viewName " + JSON.stringify(view));
+      console.log("openView: " + JSON.stringify(view));
       this.$store.commit("addPanel", view);
     },
     async openSession() {

@@ -65,13 +65,14 @@ const mixin = {
     },
 
     getSessions: function() {
-      this.queryApi({
+      return this.queryApi({
         type: "GET_SESSIONS",
         user: this.$store.getters.getUserId
       })
-        .then(result =>
-          this.$store.commit("setSessions", result.data.payload.sessions)
-        )
+        .then(result => {
+          this.$store.commit("setSessions", result.data.payload.sessions);
+          return result.data.payload.sessions;
+        })
         .catch(e => console.error("Error: " + JSON.stringify(e.response)));
     }
   }

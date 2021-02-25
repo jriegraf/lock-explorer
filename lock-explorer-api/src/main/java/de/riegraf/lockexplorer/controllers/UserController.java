@@ -2,11 +2,11 @@ package de.riegraf.lockexplorer.controllers;
 
 import de.riegraf.lockexplorer.models.Message;
 import de.riegraf.lockexplorer.models.Response;
-import de.riegraf.lockexplorer.services.JdbcSessionRegister;
 import de.riegraf.lockexplorer.services.MessageHandler;
+import de.riegraf.lockexplorer.services.SessionRegistry.SessionRegisterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,24 +18,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 class UserController {
 
-  Logger logger = LoggerFactory.getLogger(UserController.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-  @Autowired
-  JdbcTemplate jdbcTemplate;
+  final JdbcTemplate jdbcTemplate;
+  final SessionRegisterService sessionRegister;
+  final MessageHandler messageHandler;
 
-  @Autowired
-  JdbcSessionRegister sessionRegister;
-
-  @Autowired
-  MessageHandler messageHandler;
-
-  Random rn = new Random();
+  public UserController(@Qualifier("SessionRegistryProxy") SessionRegisterService sessionRegister,
+                        JdbcTemplate jdbcTemplate, MessageHandler messageHandler) {
+    this.jdbcTemplate = jdbcTemplate;
+    this.sessionRegister = sessionRegister;
+    this.messageHandler = messageHandler;
+  }
 
   @PostMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
   ResponseEntity<Response> receiveMessage(@RequestBody Message message) {

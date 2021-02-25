@@ -2,17 +2,6 @@
   <v-card dark min-width="35em">
     <v-card-title>
       <span class="mr-2">{{ title }}</span>
-      <v-chip v-if="locked" class="ma-2">
-        <v-icon class="mr-2" color="red">mdi-lock</v-icon>
-        {{ lockType }}
-      </v-chip>
-      <v-select
-        v-if="type === 'Table'"
-        v-model="session"
-        label="Session"
-        :items="this.$store.getters.getSessions"
-      >
-      </v-select>
       <v-spacer />
       <v-btn icon @click="$emit('removePanel', panelId)">
         <v-icon>mdi-close</v-icon>
@@ -43,12 +32,9 @@
 export default {
   props: {
     title: { type: String, required: true },
-    panelId: { type: Number, required: true },
-    type: { type: String, required: true }
+    panelId: { type: Number, required: true }
   },
   data: () => ({
-    locked: true,
-    lockType: "RX",
     loading: true,
     headers: [],
     data: [],
@@ -64,28 +50,16 @@ export default {
     fetchData: function() {
       this.loading = true;
 
-      let body = null;
-      if (this.type === "Table") {
-        body = {
-          type: "GET_TABLE",
-          user: this.$root.$store.getters.getUserId,
-          payload: {
-            sessionNr: this.session,
-            tableName: this.title
-          }
-        };
-      } else {
-        body = {
-          type: "GET_VIEW",
-          user: this.$root.$store.getters.getUserId,
-          payload: {
-            sessionNr: 0,
-            viewName: this.title
-          }
-        };
-      }
+      let body = {
+        type: "GET_VIEW",
+        user: this.$root.$store.getters.getUserId,
+        payload: {
+          sessionNr: this.session,
+          viewName: this.title
+        }
+      };
 
-      const selector = this.type === "Table" ? "tableData" : "viewData";
+      const selector = "viewData";
 
       this.$root
         .queryApi(body)
@@ -101,9 +75,6 @@ export default {
               value: v.columnName
             }));
           this.data = payload.data;
-          if ("lockedRows" in payload) {
-            this.lockedRows = payload.lockedRows;
-          }
         })
         .catch(e => console.error("Error: " + JSON.stringify(e.response.data)))
         .finally(() => (this.loading = false));
@@ -117,7 +88,5 @@ export default {
 </script>
 
 <style>
-.lockedRow {
-  background-color: rgb(244, 67, 55);
-}
+
 </style>

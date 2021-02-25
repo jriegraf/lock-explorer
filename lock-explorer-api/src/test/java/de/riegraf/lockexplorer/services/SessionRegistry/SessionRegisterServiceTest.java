@@ -1,5 +1,6 @@
-package de.riegraf.lockexplorer.services;
+package de.riegraf.lockexplorer.services.SessionRegistry;
 
+import de.riegraf.lockexplorer.services.UserIdGenerator;
 import oracle.jdbc.pool.OracleDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JdbcSessionRegisterTest {
+class SessionRegisterServiceTest {
 
   @Mock
   private OracleDataSource oracleDataSource;
@@ -39,10 +40,10 @@ class JdbcSessionRegisterTest {
   Statement statementMock;
 
   @MockBean
-  private JdbcTemplate jdbcTemplate;
+  private UserIdGenerator idGeneratorMock;
 
   @MockBean
-  private UserIdGenerator idGeneratorMock;
+  private JdbcTemplate jdbcTemplate;
 
   @Autowired
   JdbcSessionRegister sessionRegister;
@@ -70,6 +71,5 @@ class JdbcSessionRegisterTest {
     assertThat(sessions, hasSize(1));
     assertThat(sessions, hasItem(sid));
   }
-
 
 }

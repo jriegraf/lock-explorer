@@ -25,14 +25,27 @@ export default {
   mounted() {},
 
   async beforeMount() {
-    await this.$root
-      .queryApi({ type: "REGISTER" })
-      .then(res => this.$store.commit("setUserId", res.data.payload.userId))
-      .catch(e => console.error("Error: " + JSON.stringify(e.data)));
+    let userId = null;
+    while (userId == null) {
+      userId = await this.$root
+        .queryApi({ type: "REGISTER" })
+        .then(res => {
+          this.$store.commit("setUserId", res.data.payload.userId);
+          return res.data.payload.userId;
+        })
+        .catch(e => {
+          console.error("Error: " + JSON.stringify(e.data));
+          return null;
+        });
+    }
 
     this.$root.getAvailableTables();
     this.$root.getAvailableViews();
-    this.$root.getSessions();
+    this.$root.getSessions().then(sessions => {
+      console.log("Sessions: " + JSON.stringify(sessions));
+      const editor = { type: "Editor", name: sessions[0] };
+      this.$store.commit("addPanel", editor);
+    });
   }
 };
 </script>
