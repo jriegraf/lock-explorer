@@ -74,6 +74,19 @@ const mixin = {
           return result.data.payload.sessions;
         })
         .catch(e => console.error("Error: " + JSON.stringify(e.response)));
+    },
+
+     openSession: function() {
+      return this.queryApi({
+        type: "OPEN_SESSION",
+        user: this.$store.getters.getUserId
+      })
+        .then(async result => {
+          await this.getSessions();
+          return result;
+        })
+        .then(result => result.data.payload.sessionNr)
+        .catch(e => console.error("Error: " + JSON.stringify(e.response)));
     }
   }
 };

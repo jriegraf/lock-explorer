@@ -33,7 +33,7 @@ class JdbcSessionRegister implements SessionRegisterService {
   @Value("${DATABASE_URL}")
   private String url;
 
-  private static final int USER_EXPIRE_DURATION = 120;
+  private static final int USER_EXPIRE_DURATION = 8;
   private static final Logger logger = LoggerFactory.getLogger(JdbcSessionRegister.class);
   private final List<UserData> DB = new ArrayList<>();
   private OracleDataSource dataSource = new OracleDataSource();
@@ -114,12 +114,14 @@ class JdbcSessionRegister implements SessionRegisterService {
         .orElseThrow(() -> new NoSuchElementException("No such user."));
 
     try {
-      Optional.ofNullable(userData.getConnections().remove(sessionNr))
-          .orElseThrow(() -> new NoSuchElementException("No such connection"))
-          .close();
+      final Connection connection = Optional.ofNullable(userData.getConnections().remove(sessionNr))
+          .orElseThrow(() -> new NoSuchElementException("No such connection"));
+      if (connection.isValid(3)){
+          connection.close();
+      }
       logger.info("Closed connection {} of user {}.", sessionNr, userId);
     } catch (SQLException e) {
-      logger.error("Closing session failed: {}", e);
+      logger.warn("Closing session failed: {}", e.getMessage());
     }
   }
 

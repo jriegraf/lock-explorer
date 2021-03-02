@@ -21,6 +21,12 @@
           v-bind:title="panel.name"
           v-on:removePanel="removePanel"
         ></DbView>
+        <Scenario
+            v-if="panel.type === 'Scenario'"
+            v-bind:panelId="panel.panelId"
+            v-bind:title="panel.name"
+            v-on:removePanel="removePanel"
+        ></Scenario>
       </v-col>
     </v-row>
     <v-row v-else align="center" justify="center">
@@ -40,9 +46,10 @@
 import Editor from "@/components/Editor";
 import DbTable from "@/components/DbTable";
 import DbView from "@/components/DbView";
+import Scenario from "@/components/Scenario";
 
 export default {
-  components: { DbTable, Editor, DbView },
+  components: {Scenario, DbTable, Editor, DbView },
 
   data: () => ({
     name: "home"

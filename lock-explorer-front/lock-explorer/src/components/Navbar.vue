@@ -59,12 +59,12 @@
 
           <v-list dense>
             <v-list-item-group max="0" v-model="selectedItem" color="primary">
-              <v-list-item v-for="(item, i) in scenario_items" :key="i">
+              <v-list-item v-for="(item, i) in scenario_items" :key="i" @click="openScenario(item.title)">
                 <v-list-item-icon>
                   <v-icon>mdi-menu-right</v-icon>
                 </v-list-item-icon>
                 <v-list-item-content>
-                  <span v-text="item.text"></span>
+                  <span v-text="item.title"></span>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -131,7 +131,7 @@
 export default {
   data: () => ({
     selectedItem: "",
-    scenario_items: [{ text: "Lost Update" }, { text: "Deadlock" }],
+    scenario_items: [{ title: "Lost Update" }, { title: "Deadlock" }],
     offset: true,
     tables: [],
     views: []
@@ -154,20 +154,15 @@ export default {
       console.log("openView: " + JSON.stringify(view));
       this.$store.commit("addPanel", view);
     },
+    openScenario: function(scenarioName) {
+      let scenario = { type: "Scenario", name: scenarioName };
+      console.log("openScenario: " + JSON.stringify(scenario));
+      this.$store.commit("addPanel", scenario);
+    },
     async openSession() {
-      const body = {
-        type: "OPEN_SESSION",
-        user: this.$store.getters.getUserId
-      };
-      let newSid = null;
       await this.$root
-        .queryApi(body)
-        .then(response => {
-          console.log("SUC: " + JSON.stringify(response, null, 2));
-          newSid = response.data.payload.sessionNr;
-        })
-        .then(() => this.$root.getSessions())
-        .then(() => this.addEditor(newSid))
+        .openSession()
+        .then(newSid => this.addEditor(newSid))
         .catch(err => console.error("Can not open session.\n" + err));
     },
     closeSession(sid) {

@@ -165,12 +165,16 @@ public class MessageHandler {
   private KeyValueTuple executeSql(Message message) throws Exception {
     try {
       String userId = message.getUser().orElseThrow();
-      int sessionNr = (Integer) message.getPayloadValue("sessionNr");
+      int sessionNr = Integer.parseInt(message.getPayloadValue("sessionNr").toString());
       String sql = (String) message.getPayloadValue("sql");
       Connection conn = sessionRegister.getConnection(userId, sessionNr);
       return new KeyValueTuple("result", sqlExecutor.executeSql(conn, sql));
+    } catch (NumberFormatException n) {
+      String sessionNr = message.getPayloadValue("sessionNr").toString();
+      logger.info("Cannot parse session number: " + sessionNr);
+      throw new NoSuchElementException("Session number not valid: " + sessionNr);
     } catch (Exception e) {
-      logger.error("{}", e);
+      logger.error(e.getMessage());
       throw e;
     }
   }
